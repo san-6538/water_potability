@@ -1,118 +1,135 @@
 
+# 💧 Water Potability Prediction
 
-# Water Potability Prediction
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![Scikit-learn](https://img.shields.io/badge/Scikit--Learn-1.2-green) ![LightGBM](https://img.shields.io/badge/LightGBM-3.3-orange) ![XGBoost](https://img.shields.io/badge/XGBoost-1.7-red) ![Optuna](https://img.shields.io/badge/Optuna-3.1-purple)
 
-This project focuses on predicting the potability of water based on physicochemical properties using machine learning models, ensemble techniques, and data balancing methods.
-
-## Dataset
-
-* Source: [Water Potability Dataset](https://www.kaggle.com/datasets/adityakadiwal/water-potability)
-* Features include: `ph`, `Hardness`, `Solids`, `Chloramines`, `Sulfate`, `Conductivity`, `Organic_carbon`, `Trihalomethanes`, `Turbidity`
-* Target: `Potability` (0 = Not Potable, 1 = Potable)
-* Original class distribution:
-
-  * 0 (Not Potable): 1598 samples
-  * 1 (Potable): 1022 samples
-  * Imbalance ratio: ~1.56:1
+Predicting water potability using physicochemical properties with **machine learning**, **ensemble techniques**, **class balancing**, and **explainable AI**.
 
 ---
 
-## Approaches Implemented
+## 📊 Dataset
 
-### 1. Stacking Ensemble without Class Balancing
+* **Source:** [Kaggle - Water Potability](https://www.kaggle.com/datasets/adityakadiwal/water-potability)
+* **Features:** `ph`, `Hardness`, `Solids`, `Chloramines`, `Sulfate`, `Conductivity`, `Organic_carbon`, `Trihalomethanes`, `Turbidity`
+* **Target:** `Potability` (0 = Not Potable, 1 = Potable)
+* **Original Class Distribution:**
 
-* **Base Models**: LightGBM, XGBoost, Random Forest
-* **Meta-Model**: Logistic Regression
-* **Train-Test Split**: 80%-20% stratified
+| Class           | Count |
+| --------------- | ----- |
+| Not Potable (0) | 1598  |
+| Potable (1)     | 1022  |
+
+> Imbalance ratio ~1.56:1
+
+---
+
+## 🏗 Project Pipeline & Improvements
+
+### 1️⃣ Baseline Stacking Ensemble (No Balancing)
+
+* **Models:** LightGBM, XGBoost, Random Forest
+* **Meta-Model:** Logistic Regression
 * **Metrics:**
 
-| Metric            | Value |
-| ----------------- | ----- |
-| Accuracy          | 0.61  |
-| Precision         | 0.50  |
-| Recall            | 0.551 |
-| F1 Score          | 0.524 |
-| ROC-AUC           | 0.657 |
-| Average Precision | 0.599 |
+| Metric    | Value |
+| --------- | ----- |
+| Accuracy  | 0.61  |
+| Precision | 0.50  |
+| Recall    | 0.551 |
+| F1 Score  | 0.524 |
+| ROC-AUC   | 0.657 |
 
-* **Observations:**
+**Observations:**
 
-  * Model struggles with minority class (`Potable`) due to imbalance.
-  * Precision for potable class is low (0.50), indicating many false positives.
-  * Recall is slightly better (0.551), but still suboptimal for real-world usage.
+* Struggled with minority class (`Potable`) → low precision.
+* Recall moderate → risky for real-world deployment.
 
 ---
 
-### 2. Stacking Ensemble with SMOTE Oversampling
+### 2️⃣ SMOTE Oversampling + Ensemble
 
-* **SMOTE** used to balance training dataset:
-
-  * Positive (Potable) samples increased from 1022 → 1598
-  * Negative (Not Potable) samples kept at 1598
-* **Models**: Same as above
+* Balanced training set with SMOTE → 1598 samples each class
 * **Metrics:**
 
-| Metric            | Value |
-| ----------------- | ----- |
-| Accuracy          | 0.65  |
-| Precision         | 0.555 |
-| Recall            | 0.512 |
-| F1 Score          | 0.533 |
-| ROC-AUC           | 0.668 |
-| Average Precision | 0.610 |
+| Metric    | Value |
+| --------- | ----- |
+| Accuracy  | 0.65  |
+| Precision | 0.555 |
+| Recall    | 0.512 |
+| F1 Score  | 0.533 |
+| ROC-AUC   | 0.668 |
 
-* **Observations:**
+**Observations:**
 
-  * SMOTE balanced the class distribution, allowing the model to better learn patterns for potable water.
-  * Accuracy, precision, F1 score, ROC-AUC, and AP improved.
-  * Recall slightly decreased due to trade-off with precision.
-  * Overall, the model is more reliable for real-world classification of potable vs non-potable water.
+* Balanced learning improved model performance
+* Precision and F1 improved, recall slightly decreased
 
 ---
 
-## Visualization and Explainability
+### 3️⃣ Hyperparameter-Tuned Ensemble + Threshold Optimization
 
-1. **Confusion Matrix**: Shows class-wise prediction performance.
-2. **ROC Curve**: Visual evaluation of classification threshold performance.
-3. **Precision-Recall Curve**: Helpful for imbalanced classification tasks.
-4. **SHAP (SHapley Additive exPlanations)**:
+* Optimized **LightGBM, XGBoost, Random Forest** using Optuna
+* **SMOTE + Tomek** applied for class balancing
+* **Threshold optimized** for non-potable class → high recall priority
 
-   * Global feature importance (bar chart)
-   * Detailed feature impact (beeswarm plot)
-   * Local explanations for individual predictions (force plots)
+**Performance (focus: non-potable):**
 
-> All plots are saved as PNG files in the project directory for reporting and analysis.
+| Metric    | Value  |
+| --------- | ------ |
+| Accuracy  | 0.3369 |
+| Precision | 0.6607 |
+| Recall    | 0.9200 |
+| F1 Score  | 0.7691 |
+| ROC-AUC   | 0.6359 |
 
----
+**Highlights:**
 
-## Key Improvements Using SMOTE
-
-* Corrected the **class imbalance**, enabling better learning for minority class (`Potable` water).
-* Increased **accuracy** and **weighted F1-score**, giving a more robust overall model.
-* Improved **precision and average precision**, reducing false positives in potable predictions.
-* Enabled **fairer evaluation of model performance** across classes, reflected in ROC-AUC improvement.
-
----
-
-## Next Steps
-
-* **Hyperparameter Tuning**: Fine-tune each base model to further improve recall without hurting precision.
-* **Alternative Sampling Methods**: Try ADASYN, Borderline-SMOTE, or ensemble-based imbalance handling.
-* **Threshold Optimization**: Adjust classification threshold to balance precision vs recall based on real-world requirements.
-* **Deployment**: Build a pipeline for predicting water potability for new samples in real-time.
+* Maximized **detection of non-potable water**
+* Trade-off: overall accuracy drops → safety-critical focus
+* F1 improved for minority class, reducing false negatives
 
 ---
 
-## Requirements
+---
+
+## 🔧 Requirements
 
 ```bash
-pip install pandas matplotlib seaborn scikit-learn lightgbm xgboost shap imbalanced-learn
+pip install pandas matplotlib seaborn scikit-learn lightgbm xgboost shap imbalanced-learn optuna
 ```
 
 ---
 
-## Authors
+## 🚀 Improvement Timeline
 
-**Sachin Kumar** 
+| Stage                  | Techniques                             | Key Metrics / Learnings                                   |
+| ---------------------- | -------------------------------------- | --------------------------------------------------------- |
+| Baseline               | Stacking Ensemble                      | Low precision/recall for potable water                    |
+| SMOTE                  | Balanced Classes                       | Improved F1, ROC-AUC, precision                           |
+| Hyperparam + Threshold | Optimized ensemble + non-potable focus | High recall (0.92), improved F1 (0.769), safe predictions |
+
+---
+
+## 📌 Key Learnings
+
+* Handling **class imbalance** is crucial for real-world applications
+* **Ensemble + SMOTE/Tomek + Hyperparameter tuning** enhances model performance
+* **Threshold optimization** allows prioritization of critical classes
+* **SHAP explainability** increases trust in predictions
+
+---
+
+## 🛠 Next Steps
+
+* Test **ADASYN** or **Borderline-SMOTE** for advanced balancing
+* Implement **probability calibration** for more robust thresholds
+* Deploy **real-time prediction pipeline**
+* Explore **meta-learning ensembles** for further improvement
+
+---
+
+## 👤 Author
+
+**Sachin Kumar** – Machine Learning Enthusiast | AI for Social Good
 
 
